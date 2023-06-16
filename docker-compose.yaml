@@ -1,0 +1,39 @@
+version: "3"
+services:
+  #
+  # Core services. These services allow a Grafana Agent to send data somewhere
+  # and visualize it in Grafana.
+  #
+  # Backends: grafana, loki, cortex, tempo
+  # Example services: avalanche
+  #
+
+  grafana:
+    image: grafana/grafana:9.2.3
+    entrypoint:
+      - /usr/share/grafana/bin/grafana-server
+      - --homepath=/usr/share/grafana
+      - --config=/etc/grafana-config/grafana.ini
+    volumes:
+      - ./grafana/config:/etc/grafana-config
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards-provisioning:/etc/grafana/provisioning/dashboards
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3000:3000"
+
+  loki:
+    image: grafana/loki:2.6.1
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+
+  cortex:
+    image: cortexproject/cortex:v1.8.1
+    volumes:
+      - ./cortex/config:/etc/cortex-config
+    entrypoint:
+      - /bin/cortex
+      - -config.file=/etc/cortex-config/cortex.yaml
+    ports:
+      - "9009:9009"
