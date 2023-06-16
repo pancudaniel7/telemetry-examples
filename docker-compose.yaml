@@ -59,3 +59,15 @@ services:
       - --metric-interval=7200
     ports:
       - "9001:9001"
+
+  # tracing load generator
+  synthetic-load-generator:
+    profiles: [agent] # Should only be run if the Agent is present
+    image: omnition/synthetic-load-generator:1.0.25
+    volumes:
+      - ./load-generator:/etc/load-generator
+    environment:
+      - TOPOLOGY_FILE=/etc/load-generator/load-generator.json
+      - JAEGER_COLLECTOR_URL=http://agent:14268
+    depends_on:
+      - agent
